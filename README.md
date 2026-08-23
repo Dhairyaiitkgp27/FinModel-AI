@@ -11,178 +11,98 @@ The platform combines deterministic financial-engineering logic with AI-assisted
 # System Architecture
 
 archi
-                              ┌──────────────────────────────┐
-                              │          USER / ANALYST      │
-                              └──────────────┬───────────────┘
-                                             │
-                                             ▼
-                    ┌───────────────────────────────────────────┐
-                    │              STREAMLIT UI                  │
-                    │                                           │
-                    │ Dashboard                                 │
-                    │ Company Setup                             │
-                    │ Financial Model                           │
-                    │ Forecast                                  │
-                    │ DCF Valuation                             │
-                    │ Comparable Companies                       │
-                    │ Precedent Transactions                    │
-                    │ Scenarios                                  │
-                    │ Sensitivity Analysis                      │
-                    │ Monte Carlo                               │
-                    │ AI Assistant                              │
-                    └────────────────────┬──────────────────────┘
-                                         │
-                                         ▼
-              ┌─────────────────────────────────────────────────────┐
-              │                  APPLICATION LAYER                  │
-              │                                                     │
-              │ Input Validation                                    │
-              │ Workflow Orchestration                              │
-              │ Model State Management                              │
-              │ Scenario Management                                 │
-              │ Output Formatting                                   │
-              └────────────────────────┬────────────────────────────┘
-                                       │
-                 ┌─────────────────────┼─────────────────────┐
-                 │                     │                     │
-                 ▼                     ▼                     ▼
-       ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-       │  DATA INGESTION  │  │   AI / LLM LAYER │  │  MARKET DATA     │
-       │                  │  │                  │  │                  │
-       │ SEC Filings      │  │ Financial QA     │  │ Prices           │
-       │ Annual Reports  │  │ Statement Parse  │  │ Multiples        │
-       │ CSV / Excel      │  │ Assumption Gen   │  │ Beta             │
-       │ Manual Input     │  │ Model Mapping    │  │ Market Cap       │
-       │ PDF Extraction   │  │ Anomaly Detection│  │ Debt             │
-       └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘
-                │                     │                     │
-                └─────────────────────┼─────────────────────┘
-                                      ▼
-                    ┌────────────────────────────────────┐
-                    │        CANONICAL DATA MODEL        │
-                    │                                    │
-                    │ Company                             │
-                    │ FinancialPeriod                    │
-                    │ IncomeStatement                    │
-                    │ BalanceSheet                       │
-                    │ CashFlowStatement                  │
-                    │ ForecastAssumptions                │
-                    │ ValuationAssumptions               │
-                    │ Scenario                           │
-                    └──────────────────┬─────────────────┘
-                                       │
-                                       ▼
-             ┌──────────────────────────────────────────────────┐
-             │                  MODEL ENGINE                    │
-             │                                                  │
-             │ Historical Financials                            │
-             │ Three-Statement Model                            │
-             │ Revenue Build                                    │
-             │ Cost Build                                       │
-             │ Working Capital                                  │
-             │ PP&E Roll-Forward                                │
-             │ Debt Schedule                                    │
-             │ Interest Schedule                                │
-             │ Tax Schedule                                     │
-             │ Equity Roll-Forward                              │
-             │ Balance Sheet Reconciliation                     │
-             └────────────────────────┬─────────────────────────┘
+          ## System Architecture
+
+```text
+                         ┌──────────────────────────┐
+                         │      USER / ANALYST      │
+                         └────────────┬─────────────┘
                                       │
                                       ▼
-             ┌──────────────────────────────────────────────────┐
-             │               FORECASTING ENGINE                 │
-             │                                                  │
-             │ Revenue Forecast                                 │
-             │ Margin Forecast                                  │
-             │ COGS Forecast                                    │
-             │ Operating Expense Forecast                      │
-             │ Working Capital Forecast                         │
-             │ Capex Forecast                                   │
-             │ Depreciation Forecast                            │
-             │ Debt Forecast                                    │
-             │ Interest Forecast                                │
-             │ Tax Forecast                                     │
-             │ Free Cash Flow Forecast                          │
-             │ Multi-Year Projection                            │
-             └────────────────────────┬─────────────────────────┘
-                                      │
-                                      ▼
-                    ┌─────────────────────────────────┐
-                    │        FREE CASH FLOW ENGINE    │
-                    │                                 │
-                    │ EBIT                            │
-                    │ ↓                               │
-                    │ NOPAT                           │
-                    │ + Depreciation                  │
-                    │ - Capex                         │
-                    │ - ΔNWC                          │
-                    │ ↓                               │
-                    │ Unlevered FCF                   │
-                    └────────────────┬────────────────┘
-                                     │
-                                     ▼
-          ┌────────────────────────────────────────────────────────┐
-          │                    VALUATION ENGINE                    │
-          │                                                        │
-          │ ┌────────────────┐   ┌─────────────────────────────┐ │
-          │ │ DCF Valuation  │   │ Comparable Company Analysis │ │
-          │ └────────────────┘   └─────────────────────────────┘ │
-          │                                                        │
-          │ ┌────────────────┐   ┌─────────────────────────────┐ │
-          │ │ Precedent      │   │ Monte Carlo Valuation       │ │
-          │ │ Transactions   │   │                             │ │
-          │ └────────────────┘   └─────────────────────────────┘ │
-          └───────────────────────────┬────────────────────────────┘
-                                      │
-                    ┌─────────────────┼──────────────────┐
-                    │                 │                  │
-                    ▼                 ▼                  ▼
-          ┌────────────────┐ ┌────────────────┐ ┌──────────────────┐
-          │ SCENARIO       │ │ SENSITIVITY    │ │ MONTE CARLO      │
-          │ ENGINE         │ │ ENGINE         │ │ ENGINE           │
-          │                │ │                │ │                  │
-          │ Base           │ │ WACC           │ │ WACC             │
-          │ Bull           │ │ Terminal g     │ │ Revenue Growth   │
-          │ Bear           │ │ Revenue Growth │ │ EBITDA Margin    │
-          │ Custom         │ │ Margin         │ │ Terminal Growth  │
-          └───────┬────────┘ └───────┬────────┘ └────────┬─────────┘
-                  │                  │                   │
-                  └──────────────────┼───────────────────┘
-                                     ▼
-                       ┌────────────────────────────┐
-                       │      VALUATION OUTPUT      │
-                       │                            │
-                       │ Enterprise Value           │
-                       │ Equity Value               │
-                       │ Implied Share Price        │
-                       │ Valuation Range            │
-                       │ Probability Distribution   │
-                       │ Upside / Downside           │
-                       └──────────────┬─────────────┘
-                                      │
-                                      ▼
-                       ┌────────────────────────────┐
-                       │      VALIDATION ENGINE     │
-                       │                            │
-                       │ Accounting Checks          │
-                       │ Balance Sheet Checks       │
-                       │ Forecast Checks            │
-                       │ Cash Flow Checks           │
-                       │ Valuation Checks           │
-                       │ Data Quality Checks        │
-                       │ Model Integrity Checks     │
-                       └──────────────┬─────────────┘
-                                      │
-                                      ▼
-                       ┌────────────────────────────┐
-                       │    ANALYST OUTPUT LAYER    │
-                       │                            │
-                       │ Interactive Dashboard      │
-                       │ Charts                     │
-                       │ Valuation Tables           │
-                       │ Scenario Comparison       │
-                       │ Sensitivity Heatmaps       │
-                       │ Model Export               │
-                       │ Excel Export               │
-                       │ Investment Memo             │
-                       └────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           STREAMLIT UI LAYER                                │
+│                                                                             │
+│ Dashboard │ Company Setup │ Financial Model │ Forecast │ DCF Valuation     │
+│ Scenarios │ Sensitivity Analysis │ Comparables │ Precedent Transactions   │
+│ Monte Carlo │ AI Financial Assistant                                        │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          APPLICATION LAYER                                  │
+│                                                                             │
+│ Input Validation │ Workflow Orchestration │ Model State Management         │
+│ Scenario Management │ Calculation Engine │ Output Formatting               │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                ┌────────────────┴────────────────┐
+                ▼                                 ▼
+┌───────────────────────────────┐   ┌─────────────────────────────────────────┐
+│      AI / LLM LAYER           │   │          DATA INGESTION LAYER           │
+│                               │   │                                         │
+│ Financial QA                  │   │ Annual Reports / 10-K / 10-Q           │
+│ Statement Parsing             │   │ SEC Filings                            │
+│ Assumption Generation        │   │ CSV / Excel                            │
+│ Financial Data Extraction     │   │ Manual Input                           │
+│ Anomaly Detection             │   │ PDF Extraction                         │
+└───────────────┬───────────────┘   │ Market Data / Prices                   │
+                │                   │ Comparable Company Data                │
+                │                   │ Precedent Transaction Data             │
+                │                   └───────────────────┬─────────────────────┘
+                │                                       │
+                └───────────────────┬───────────────────┘
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CANONICAL DATA MODEL                                │
+│                                                                             │
+│ Company │ FinancialPeriod │ IncomeStatement │ BalanceSheet                 │
+│ CashFlowStatement │ HistoricalFinancials │ ForecastAssumptions             │
+│ Debt │ Equity │ Shares Outstanding │ Market Data                            │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FINANCIAL ENGINE                                    │
+│                                                                             │
+│ Revenue │ COGS │ Operating Expenses │ EBITDA │ EBIT │ Taxes                │
+│ Working Capital │ CapEx │ Depreciation │ Debt │ Free Cash Flow             │
+│ Three-Statement Integration │ Financial Reconciliation                     │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           MODEL ENGINE                                      │
+│                                                                             │
+│ Historical Analysis │ Multi-Year Forecasting │ Driver-Based Modeling       │
+│ Revenue Forecasting │ Margin Forecasting │ Working Capital Forecasting     │
+│ CapEx / D&A Forecasting │ Debt Schedule │ Scenario Management              │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         VALUATION ENGINE                                    │
+│                                                                             │
+│ DCF │ WACC │ Terminal Value │ Enterprise Value │ Equity Value              │
+│ Implied Share Price │ Sensitivity Tables │ Comparable Companies            │
+│ Precedent Transactions │ Monte Carlo Valuation                              │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       VALIDATION & TESTING                                  │
+│                                                                             │
+│ Unit Tests │ Integration Tests │ Financial Reconciliation │ Edge Cases      │
+│ Model Validation │ Calculation Integrity │ End-to-End Tests                │
+└────────────────────────────────┬────────────────────────────────────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────────┐
+                    │       VALUATION OUTPUTS      │
+                    │                              │
+                    │ Financial Statements         │
+                    │ Forecasts                    │
+                    │ DCF Valuation                │
+                    │ Sensitivity Analysis         │
+                    │ Scenario Comparison          │
+                    │ Investment Insights          │
+                    └──────────────────────────────┘
