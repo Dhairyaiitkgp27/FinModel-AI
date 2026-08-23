@@ -1,0 +1,21 @@
+﻿# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# IDE / editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated Excel outputs
+test_model.xlsx
+test_forecast_model.xlsx
