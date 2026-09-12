@@ -1,0 +1,246 @@
+{
+  "unit_scale": 1000000,
+  "currency": "USD",
+  "period_type": "annual",
+  "note": "Approximate figures compiled from Microsoft Corporation public annual reports (Form 10-K), FY2021-FY2023 (fiscal year ends June 30), in USD millions. Bundled as illustrative sample data for offline use.",
+  "profile": {
+    "ticker": "MSFT",
+    "name": "Microsoft Corporation",
+    "exchange": "NASDAQ",
+    "sector": "Technology",
+    "industry": "Software - Infrastructure",
+    "country": "United States",
+    "currency": "USD",
+    "website": "https://www.microsoft.com",
+    "employees": 221000
+  },
+  "market_data": {
+    "as_of": "2023-11-03",
+    "price": 352.8,
+    "shares_outstanding": 7432.0,
+    "beta": 0.9,
+    "trailing_pe": 34.2,
+    "currency": "USD"
+  },
+  "income_statements": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-06-30"
+      },
+      "revenue": 168088,
+      "cost_of_revenue": 52232,
+      "research_development": 20716,
+      "selling_general_admin": 25224,
+      "ebit": 69916,
+      "depreciation_amortization": 11686,
+      "other_income_expense": 1186,
+      "pretax_income": 71102,
+      "tax_expense": 9831,
+      "net_income": 61271,
+      "shares_basic": 7547.0,
+      "shares_diluted": 7608.0
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-06-30"
+      },
+      "revenue": 198270,
+      "cost_of_revenue": 62650,
+      "research_development": 24512,
+      "selling_general_admin": 27725,
+      "ebit": 83383,
+      "depreciation_amortization": 14460,
+      "other_income_expense": 333,
+      "pretax_income": 83716,
+      "tax_expense": 10978,
+      "net_income": 72738,
+      "shares_basic": 7496.0,
+      "shares_diluted": 7540.0
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-06-30"
+      },
+      "revenue": 211915,
+      "cost_of_revenue": 65863,
+      "research_development": 27195,
+      "selling_general_admin": 30334,
+      "ebit": 88523,
+      "depreciation_amortization": 13861,
+      "other_income_expense": 788,
+      "pretax_income": 89311,
+      "tax_expense": 16950,
+      "net_income": 72361,
+      "shares_basic": 7446.0,
+      "shares_diluted": 7472.0
+    }
+  ],
+  "balance_sheets": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-06-30"
+      },
+      "cash_and_equivalents": 14224,
+      "short_term_investments": 116110,
+      "total_current_assets": 184406,
+      "net_ppe": 70803,
+      "total_assets": 333779,
+      "short_term_debt": 8072,
+      "total_current_liabilities": 88657,
+      "long_term_debt": 50074,
+      "total_liabilities": 191791,
+      "total_equity": 141988
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-06-30"
+      },
+      "cash_and_equivalents": 13931,
+      "short_term_investments": 90826,
+      "total_current_assets": 169684,
+      "net_ppe": 87546,
+      "total_assets": 364840,
+      "short_term_debt": 2749,
+      "total_current_liabilities": 95082,
+      "long_term_debt": 47032,
+      "total_liabilities": 198298,
+      "total_equity": 166542
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-06-30"
+      },
+      "cash_and_equivalents": 34704,
+      "short_term_investments": 76558,
+      "accounts_receivable": 48688,
+      "total_current_assets": 184257,
+      "net_ppe": 95641,
+      "goodwill_and_intangibles": 77252,
+      "total_assets": 411976,
+      "accounts_payable": 18095,
+      "short_term_debt": 5247,
+      "total_current_liabilities": 104149,
+      "long_term_debt": 41990,
+      "total_liabilities": 205753,
+      "total_equity": 206223
+    }
+  ],
+  "cash_flow_statements": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-06-30"
+      },
+      "net_income": 61271,
+      "depreciation_amortization": 11686,
+      "stock_based_compensation": 6118,
+      "cash_from_operations": 76740,
+      "capital_expenditures": -20622,
+      "dividends_paid": -16521,
+      "share_repurchase": -27385
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-06-30"
+      },
+      "net_income": 72738,
+      "depreciation_amortization": 14460,
+      "stock_based_compensation": 7502,
+      "cash_from_operations": 89035,
+      "capital_expenditures": -23886,
+      "dividends_paid": -18135,
+      "share_repurchase": -28033
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-06-30"
+      },
+      "net_income": 72361,
+      "depreciation_amortization": 13861,
+      "stock_based_compensation": 9611,
+      "cash_from_operations": 87582,
+      "capital_expenditures": -28107,
+      "dividends_paid": -19800,
+      "share_repurchase": -22245
+    }
+  ],
+  "peers": [
+    {
+      "ticker": "AAPL",
+      "name": "Apple Inc.",
+      "market_cap": 2750000,
+      "enterprise_value": 2800000,
+      "revenue": 383285,
+      "ebitda": 125820,
+      "net_income": 96995,
+      "book_value": 62146
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "market_cap": 1700000,
+      "enterprise_value": 1600000,
+      "revenue": 307394,
+      "ebitda": 95000,
+      "net_income": 73795,
+      "book_value": 283379
+    },
+    {
+      "ticker": "ORCL",
+      "name": "Oracle Corporation",
+      "market_cap": 300000,
+      "enterprise_value": 380000,
+      "revenue": 50000,
+      "ebitda": 21000,
+      "net_income": 8500,
+      "book_value": 12000
+    }
+  ],
+  "precedent_transactions": [
+    {
+      "target": "Illustrative Enterprise Software Co",
+      "acquirer": "Illustrative Acquirer I",
+      "ev_to_revenue": 8.0,
+      "ev_to_ebitda": 24.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Cloud Platform Co",
+      "acquirer": "Illustrative Acquirer II",
+      "ev_to_revenue": 6.5,
+      "ev_to_ebitda": 20.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Consumer Tech Co",
+      "acquirer": "Illustrative Acquirer III",
+      "ev_to_revenue": 4.0,
+      "ev_to_ebitda": 15.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Devices Co",
+      "acquirer": "Illustrative Acquirer IV",
+      "ev_to_revenue": 3.0,
+      "ev_to_ebitda": 12.0,
+      "is_sample": true
+    }
+  ]
+}

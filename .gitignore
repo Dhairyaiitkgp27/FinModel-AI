@@ -1,21 +1,33 @@
-﻿# Virtual environment
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
 .venv/
 venv/
 env/
 
-# Python cache
-__pycache__/
-*.py[cod]
-.pytest_cache/
+# Environment / secrets
+.env
+*.key
 
-# IDE / editor files
-.vscode/
-.idea/
+# Data / indexes / generated artefacts
+data/uploads/
+data/indexes/
+*.faiss
+outputs/
+*.xlsx
+*.pdf
+!data/sample/**
 
-# OS files
+# OS / editor
 .DS_Store
-Thumbs.db
-
-# Generated Excel outputs
-test_model.xlsx
-test_forecast_model.xlsx
+.idea/
+.vscode/

@@ -1,0 +1,252 @@
+{
+  "unit_scale": 1000000,
+  "currency": "USD",
+  "period_type": "annual",
+  "note": "Approximate figures compiled from Apple Inc. public annual reports (Form 10-K), FY2021-FY2023, in USD millions. Bundled as illustrative sample data for offline use.",
+  "profile": {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "exchange": "NASDAQ",
+    "sector": "Technology",
+    "industry": "Consumer Electronics",
+    "country": "United States",
+    "currency": "USD",
+    "website": "https://www.apple.com",
+    "employees": 161000
+  },
+  "market_data": {
+    "as_of": "2023-11-03",
+    "price": 176.65,
+    "shares_outstanding": 15550.061,
+    "beta": 1.29,
+    "trailing_pe": 28.7,
+    "currency": "USD"
+  },
+  "income_statements": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-09-25"
+      },
+      "revenue": 365817,
+      "cost_of_revenue": 212981,
+      "research_development": 21914,
+      "selling_general_admin": 21973,
+      "ebit": 108949,
+      "depreciation_amortization": 11284,
+      "other_income_expense": 258,
+      "pretax_income": 109207,
+      "tax_expense": 14527,
+      "net_income": 94680,
+      "shares_basic": 16701.272,
+      "shares_diluted": 16864.919
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-09-24"
+      },
+      "revenue": 394328,
+      "cost_of_revenue": 223546,
+      "research_development": 26251,
+      "selling_general_admin": 25094,
+      "ebit": 119437,
+      "depreciation_amortization": 11104,
+      "other_income_expense": -334,
+      "pretax_income": 119103,
+      "tax_expense": 19300,
+      "net_income": 99803,
+      "shares_basic": 16215.963,
+      "shares_diluted": 16325.819
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-09-30"
+      },
+      "revenue": 383285,
+      "cost_of_revenue": 214137,
+      "research_development": 29915,
+      "selling_general_admin": 24932,
+      "ebit": 114301,
+      "depreciation_amortization": 11519,
+      "other_income_expense": -565,
+      "pretax_income": 113736,
+      "tax_expense": 16741,
+      "net_income": 96995,
+      "shares_basic": 15744.231,
+      "shares_diluted": 15812.547
+    }
+  ],
+  "balance_sheets": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-09-25"
+      },
+      "cash_and_equivalents": 34940,
+      "short_term_investments": 27699,
+      "accounts_receivable": 26278,
+      "inventory": 6580,
+      "total_current_assets": 134836,
+      "net_ppe": 39440,
+      "total_assets": 351002,
+      "accounts_payable": 54763,
+      "short_term_debt": 15613,
+      "total_current_liabilities": 125481,
+      "long_term_debt": 109106,
+      "total_liabilities": 287912,
+      "total_equity": 63090
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-09-24"
+      },
+      "cash_and_equivalents": 23646,
+      "short_term_investments": 24658,
+      "accounts_receivable": 28184,
+      "inventory": 4946,
+      "total_current_assets": 135405,
+      "net_ppe": 42117,
+      "total_assets": 352755,
+      "accounts_payable": 64115,
+      "short_term_debt": 21110,
+      "total_current_liabilities": 153982,
+      "long_term_debt": 98959,
+      "total_liabilities": 302083,
+      "total_equity": 50672
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-09-30"
+      },
+      "cash_and_equivalents": 29965,
+      "short_term_investments": 31590,
+      "accounts_receivable": 29508,
+      "inventory": 6331,
+      "total_current_assets": 143566,
+      "net_ppe": 43715,
+      "total_assets": 352583,
+      "accounts_payable": 62611,
+      "short_term_debt": 15807,
+      "total_current_liabilities": 145308,
+      "long_term_debt": 95281,
+      "total_liabilities": 290437,
+      "total_equity": 62146
+    }
+  ],
+  "cash_flow_statements": [
+    {
+      "period": {
+        "fiscal_year": 2021,
+        "period_type": "annual",
+        "period_end": "2021-09-25"
+      },
+      "net_income": 94680,
+      "depreciation_amortization": 11284,
+      "stock_based_compensation": 7906,
+      "cash_from_operations": 104038,
+      "capital_expenditures": -11085,
+      "dividends_paid": -14467,
+      "share_repurchase": -85971
+    },
+    {
+      "period": {
+        "fiscal_year": 2022,
+        "period_type": "annual",
+        "period_end": "2022-09-24"
+      },
+      "net_income": 99803,
+      "depreciation_amortization": 11104,
+      "stock_based_compensation": 9038,
+      "cash_from_operations": 122151,
+      "capital_expenditures": -10708,
+      "dividends_paid": -14841,
+      "share_repurchase": -89402
+    },
+    {
+      "period": {
+        "fiscal_year": 2023,
+        "period_type": "annual",
+        "period_end": "2023-09-30"
+      },
+      "net_income": 96995,
+      "depreciation_amortization": 11519,
+      "stock_based_compensation": 10833,
+      "cash_from_operations": 110543,
+      "capital_expenditures": -10959,
+      "dividends_paid": -15025,
+      "share_repurchase": -77550
+    }
+  ],
+  "peers": [
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft Corporation",
+      "market_cap": 2600000,
+      "enterprise_value": 2560000,
+      "revenue": 211915,
+      "ebitda": 102000,
+      "net_income": 72361,
+      "book_value": 206223
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "market_cap": 1700000,
+      "enterprise_value": 1600000,
+      "revenue": 307394,
+      "ebitda": 95000,
+      "net_income": 73795,
+      "book_value": 283379
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "market_cap": 900000,
+      "enterprise_value": 870000,
+      "revenue": 134902,
+      "ebitda": 55000,
+      "net_income": 39098,
+      "book_value": 153168
+    }
+  ],
+  "precedent_transactions": [
+    {
+      "target": "Illustrative Enterprise Software Co",
+      "acquirer": "Illustrative Acquirer I",
+      "ev_to_revenue": 8.0,
+      "ev_to_ebitda": 24.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Cloud Platform Co",
+      "acquirer": "Illustrative Acquirer II",
+      "ev_to_revenue": 6.5,
+      "ev_to_ebitda": 20.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Consumer Tech Co",
+      "acquirer": "Illustrative Acquirer III",
+      "ev_to_revenue": 4.0,
+      "ev_to_ebitda": 15.0,
+      "is_sample": true
+    },
+    {
+      "target": "Illustrative Devices Co",
+      "acquirer": "Illustrative Acquirer IV",
+      "ev_to_revenue": 3.0,
+      "ev_to_ebitda": 12.0,
+      "is_sample": true
+    }
+  ]
+}

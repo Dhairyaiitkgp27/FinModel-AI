@@ -1,0 +1,17 @@
+# Local orchestration for the FinModel AI dashboard.
+# Usage: `docker compose up --build`, then open http://localhost:8501
+services:
+  finmodel:
+    build: .
+    image: finmodel-ai:latest
+    ports:
+      - "8501:8501"
+    environment:
+      # Passed through from your shell / .env (compose interpolates ${...}).
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DATA_PROVIDER=${DATA_PROVIDER:-local}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount sample data so it can be updated without rebuilding the image.
+      - ./data:/app/data:ro
+    restart: unless-stopped

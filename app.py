@@ -1,713 +1,208 @@
-import streamlit as st
+"""FinModel AI entry point.
 
-from core.models.model import FinancialModel
-from core.forecasting.valuation import (
-    calculate_dcf_value,
-    calculate_equity_value,
-    calculate_share_price,
-    dcf_sensitivity,
-)
+Run ``streamlit run app.py`` to launch the interactive dashboard (Phase 12).
+Run ``python app.py`` for a lightweight smoke test that verifies the package
+imports, configuration loads, and the full analysis stack executes end-to-end on
+bundled sample data — keeping the project runnable at every phase.
+"""
+from __future__ import annotations
 
+from config import get_settings
+from core import __version__
+from core.data import available_sample_tickers, load_and_validate
+from core.utils import get_logger
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-
-st.set_page_config(
-    page_title="FinModel AI",
-    page_icon="📊",
-    layout="wide",
-)
+logger = get_logger("finmodel.app")
 
 
-# ============================================================
-# SIDEBAR
-# ============================================================
+def smoke_test() -> None:
+    """Load a sample company through the data layer and print a short report."""
+    settings = get_settings()
 
-st.sidebar.title("📊 FinModel AI")
-st.sidebar.markdown("### Navigation")
+    logger.info("FinModel AI v%s", __version__)
+    logger.info("Data provider: %s (live=%s)", settings.data_provider, settings.use_live_data)
+    logger.info("OpenAI configured: %s", settings.has_openai())
 
-page = st.sidebar.radio(
-    "Go to",
-    [
-        "Dashboard",
-        "Financial Model",
-        "Forecast",
-        "DCF Valuation",
-        "Scenarios",
-        "Sensitivity Analysis",
-    ],
-)
-
-st.sidebar.markdown("---")
-st.sidebar.caption("FinModel AI — Financial Modeling Platform")
-
-
-# ============================================================
-# HEADER
-# ============================================================
-
-st.title("📊 FinModel AI")
-st.subheader("Financial Modeling & Valuation Platform")
-
-st.markdown("---")
-
-
-# ============================================================
-# ENGINE STATUS
-# ============================================================
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric(
-        "Financial Engine",
-        "READY",
-        "68 tests passed",
+    print(
+        f"FinModel AI v{__version__} — Provider={settings.data_provider}, "
+        f"OpenAI={'yes' if settings.has_openai() else 'no'}."
     )
 
-with col2:
-    st.metric(
-        "Model Engine",
-        "READY",
-    )
+    # Phase 2: exercise the data layer against bundled sample data. Force the
+    # local provider so the smoke test never depends on the network.
+    samples = available_sample_tickers()
+    print(f"Bundled sample tickers: {', '.join(samples) or 'none'}")
 
-with col3:
-    st.metric(
-        "Valuation Engine",
-        "READY",
-    )
+    for ticker in samples:
+        dataset, report = load_and_validate(ticker, provider="local")
+        income = dataset.financials.latest_income()
+        balance = dataset.financials.latest_balance()
+        cash_flow = dataset.financials.latest_cash_flow()
+        market = dataset.market_data
 
-st.markdown("---")
+        revenue_b = (income.revenue or 0) / 1e9
+        gross_margin = (income.gross_margin or 0) * 100
+        fcf_b = (cash_flow.free_cash_flow or 0) / 1e9 if cash_flow else 0.0
+        market_cap_t = (market.market_cap or 0) / 1e12 if market else 0.0
+        balanced = balance.is_balanced() if balance else None
 
-
-# ============================================================
-# SESSION STATE
-# ============================================================
-
-if "model" not in st.session_state:
-    st.session_state.model = None
-
-if "company_name" not in st.session_state:
-    st.session_state.company_name = "Example Corp"
-
-if "ticker" not in st.session_state:
-    st.session_state.ticker = "AAPL"
-
-if "currency" not in st.session_state:
-    st.session_state.currency = "USD"
-
-if "historical_years" not in st.session_state:
-    st.session_state.historical_years = 5
-
-if "fcfs" not in st.session_state:
-    st.session_state.fcfs = []
-
-if "dcf_result" not in st.session_state:
-    st.session_state.dcf_result = None
-
-
-# ============================================================
-# DASHBOARD
-# ============================================================
-
-if page == "Dashboard":
-
-    st.header("Company Setup")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        company_name = st.text_input(
-            "Company Name",
-            value=st.session_state.company_name,
+        print(
+            f"  {ticker}: {income.period.label()} revenue ${revenue_b:,.0f}B, "
+            f"gross margin {gross_margin:.1f}%, FCF ${fcf_b:,.0f}B, "
+            f"market cap ${market_cap_t:.2f}T, balance ok={balanced}, "
+            f"validation={'clean' if report.is_valid else 'issues'}"
         )
 
-    with col2:
-        ticker = st.text_input(
-            "Ticker Symbol",
-            value=st.session_state.ticker,
+    # Phase 4: project a linked three-statement model for the first sample and
+    # confirm the projected balance sheets balance.
+    if samples:
+        from core.forecasting import build_scenario_from_history, forecast_statements
+
+        ticker = samples[0]
+        dataset, _ = load_and_validate(ticker, provider="local")
+        scenario = build_scenario_from_history(
+            dataset.financials, revenue_growth=0.06, horizon_years=5, name="Base"
+        )
+        forecast = forecast_statements(dataset.financials, scenario)
+        final = forecast.statements.income_statements[-1]
+        print(
+            f"5y forecast ({ticker}, +6%/yr): "
+            f"{final.period.label()} revenue ${(final.revenue or 0) / 1e9:,.0f}B, "
+            f"terminal-year FCFF ${forecast.free_cash_flows[-1] / 1e9:,.0f}B, "
+            f"balance sheets balance every year: {forecast.balance_checks_passed}"
         )
 
-    currency = st.selectbox(
-        "Currency",
-        ["USD", "INR", "EUR", "GBP"],
-        index=["USD", "INR", "EUR", "GBP"].index(
-            st.session_state.currency
-        ),
-    )
+        # Phase 5: bull/base/bear scenario spread on terminal-year revenue.
+        from core.forecasting import build_and_compare, terminal_values
 
-    st.markdown("---")
-
-    st.header("Historical Financials")
-
-    years = st.slider(
-        "Number of historical years",
-        min_value=3,
-        max_value=10,
-        value=st.session_state.historical_years,
-    )
-
-    st.info(
-        f"Selected {years} years of historical financial data "
-        f"for {company_name} ({ticker})."
-    )
-
-    st.markdown("---")
-
-    if st.button(
-        "🚀 Build Financial Model",
-        type="primary",
-        use_container_width=True,
-    ):
-
-        try:
-
-            model = FinancialModel(
-                company_name=company_name,
-                currency=currency,
-            )
-
-            st.session_state.model = model
-            st.session_state.company_name = company_name
-            st.session_state.ticker = ticker
-            st.session_state.currency = currency
-            st.session_state.historical_years = years
-
-            st.success(
-                "Financial model successfully initialized."
-            )
-
-            st.write("### Model Configuration")
-
-            col1, col2, col3, col4 = st.columns(4)
-
-            with col1:
-                st.metric("Company", company_name)
-
-            with col2:
-                st.metric("Ticker", ticker)
-
-            with col3:
-                st.metric("Currency", currency)
-
-            with col4:
-                st.metric("Historical Years", years)
-
-            st.write("### Backend Model Object")
-
-            st.json(model.model_dump())
-
-        except Exception as e:
-
-            st.error(
-                f"Could not initialize financial model: {e}"
-            )
-
-
-# ============================================================
-# FINANCIAL MODEL
-# ============================================================
-
-elif page == "Financial Model":
-
-    st.header("Financial Model")
-
-    if st.session_state.model is None:
-
-        st.warning(
-            "Build a financial model from the Dashboard first."
+        comparison = build_and_compare(dataset.financials, base_growth=0.06, horizon_years=5)
+        rev = terminal_values(comparison, "revenue")
+        print(
+            f"Scenario spread ({ticker}, {final.period.label()} revenue): "
+            f"bear ${rev['Bear'] / 1e9:,.0f}B / base ${rev['Base'] / 1e9:,.0f}B / "
+            f"bull ${rev['Bull'] / 1e9:,.0f}B"
         )
 
-    else:
+        # Phase 6: end-to-end DCF valuation from the same dataset.
+        from core.valuation import dcf_valuation
 
-        model = st.session_state.model
-
-        st.success(
-            f"Model loaded for "
-            f"{model.company_name}"
+        dcf = dcf_valuation(
+            dataset, base_growth=0.06, horizon_years=5, terminal_growth=0.025
+        )
+        market_price = dataset.market_data.price if dataset.market_data else None
+        vs_market = f" vs market ${market_price:,.2f}" if market_price else ""
+        print(
+            f"DCF ({ticker}): WACC {dcf.wacc * 100:.1f}%, "
+            f"implied ${dcf.implied_share_price:,.2f}/share{vs_market}, "
+            f"terminal value {dcf.terminal_value_pct * 100:.0f}% of EV"
         )
 
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.metric(
-                "Company",
-                model.company_name,
-            )
-
-        with col2:
-            st.metric(
-                "Currency",
-                model.currency,
-            )
-
-        with col3:
-            st.metric(
-                "Tax Rate",
-                f"{model.tax_rate:.1%}",
-            )
-
-        st.markdown("---")
-
-        st.subheader("Model Assumptions")
-
-        tax_rate = st.number_input(
-            "Tax Rate",
-            min_value=0.0,
-            max_value=1.0,
-            value=float(model.tax_rate),
-            step=0.01,
-            format="%.2f",
-        )
-
-        wacc = st.number_input(
-            "WACC",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.10 if model.wacc is None else float(model.wacc),
-            step=0.005,
-            format="%.3f",
-        )
-
-        terminal_growth = st.number_input(
-            "Terminal Growth Rate",
-            min_value=0.0,
-            max_value=0.20,
-            value=0.03
-            if model.terminal_growth_rate is None
-            else float(model.terminal_growth_rate),
-            step=0.005,
-            format="%.3f",
-        )
-
-        if st.button(
-            "Save Model Assumptions",
-            type="primary",
-        ):
-
-            model.tax_rate = tax_rate
-            model.wacc = wacc
-            model.terminal_growth_rate = terminal_growth
-
-            st.session_state.model = model
-
-            st.success(
-                "Model assumptions updated."
-            )
-
-        st.markdown("---")
-
-        st.subheader("Current Model")
-
-        st.json(model.model_dump())
-
-
-# ============================================================
-# FORECAST
-# ============================================================
-
-elif page == "Forecast":
-
-    st.header("Free Cash Flow Forecast")
-
-    st.write(
-        "Enter projected Free Cash Flow for each forecast year."
-    )
-
-    forecast_years = st.number_input(
-        "Forecast Periods",
-        min_value=1,
-        max_value=15,
-        value=5,
-        step=1,
-    )
-
-    fcfs = []
-
-    cols = st.columns(min(int(forecast_years), 5))
-
-    for i in range(int(forecast_years)):
-
-        with cols[i % 5]:
-
-            fcf = st.number_input(
-                f"Year {i + 1} FCF",
-                value=100.0,
-                step=10.0,
-                key=f"fcf_{i}",
-            )
-
-            fcfs.append(fcf)
-
-    if st.button(
-        "Save Forecast",
-        type="primary",
-    ):
-
-        st.session_state.fcfs = fcfs
-
-        st.success(
-            "Forecast successfully saved."
-        )
-
-    if st.session_state.fcfs:
-
-        st.markdown("---")
-
-        st.subheader("Forecast Summary")
-
-        for i, fcf in enumerate(
-            st.session_state.fcfs,
-            start=1,
-        ):
-
-            st.write(
-                f"Year {i}: "
-                f"{fcf:,.2f} "
-                f"{st.session_state.currency}"
-            )
-
-
-# ============================================================
-# DCF VALUATION
-# ============================================================
-
-elif page == "DCF Valuation":
-
-    st.header("DCF Valuation")
-
-    if not st.session_state.fcfs:
-
-        st.warning(
-            "Enter and save forecast FCFs from the Forecast page first."
-        )
-
-    else:
-
-        st.subheader("DCF Assumptions")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-
-            discount_rate = st.number_input(
-                "WACC / Discount Rate",
-                min_value=0.001,
-                max_value=1.0,
-                value=0.10,
-                step=0.005,
-                format="%.3f",
-            )
-
-        with col2:
-
-            terminal_growth_rate = st.number_input(
-                "Terminal Growth Rate",
-                min_value=0.0,
-                max_value=0.20,
-                value=0.03,
-                step=0.005,
-                format="%.3f",
-            )
-
-        st.markdown("---")
-
-        if st.button(
-            "Calculate DCF",
-            type="primary",
-            use_container_width=True,
-        ):
-
-            try:
-
-                result = calculate_dcf_value(
-                    free_cash_flows=st.session_state.fcfs,
-                    discount_rate=discount_rate,
-                    terminal_growth_rate=terminal_growth_rate,
-                )
-
-                st.session_state.dcf_result = result
-
-                st.success(
-                    "DCF valuation calculated successfully."
-                )
-
-            except Exception as e:
-
-                st.error(
-                    f"DCF calculation failed: {e}"
-                )
-
-        if st.session_state.dcf_result:
-
-            result = st.session_state.dcf_result
-
-            st.markdown("---")
-
-            st.subheader("DCF Results")
-
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-
-                st.metric(
-                    "Enterprise Value",
-                    f"{result.enterprise_value:,.2f}",
-                )
-
-            with col2:
-
-                st.metric(
-                    "Terminal Value",
-                    f"{result.terminal_value:,.2f}",
-                )
-
-            with col3:
-
-                st.metric(
-                    "Terminal PV",
-                    f"{result.terminal_present_value:,.2f}",
-                )
-
-            st.markdown("---")
-
-            st.subheader("Present Value of Forecast FCF")
-
-            for i, pv in enumerate(
-                result.present_values,
-                start=1,
-            ):
-
-                st.write(
-                    f"Year {i}: "
-                    f"{pv:,.2f}"
-                )
-
-            st.markdown("---")
-
-            st.subheader("Equity Value")
-
-            debt = st.number_input(
-                "Total Debt",
-                min_value=0.0,
-                value=0.0,
-                step=10.0,
-            )
-
-            cash = st.number_input(
-                "Cash",
-                min_value=0.0,
-                value=0.0,
-                step=10.0,
-            )
-
-            shares = st.number_input(
-                "Shares Outstanding",
-                min_value=0.000001,
-                value=1.0,
-                step=1.0,
-            )
-
-            if st.button(
-                "Calculate Equity Value",
-                type="primary",
-            ):
-
-                equity_value = calculate_equity_value(
-                    enterprise_value=result.enterprise_value,
-                    total_debt=debt,
-                    cash=cash,
-                )
-
-                share_price = calculate_share_price(
-                    equity_value=equity_value,
-                    shares_outstanding=shares,
-                )
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-
-                    st.metric(
-                        "Equity Value",
-                        f"{equity_value:,.2f}",
-                    )
-
-                with col2:
-
-                    st.metric(
-                        "Implied Share Price",
-                        f"{share_price:,.2f}",
-                    )
-
-
-# ============================================================
-# SCENARIOS
-# ============================================================
-
-elif page == "Scenarios":
-
-    st.header("Scenario Analysis")
-
-    st.write(
-        "Adjust operating assumptions to compare "
-        "different valuation scenarios."
-    )
-
-    scenario = st.selectbox(
-        "Scenario",
-        [
-            "Base Case",
-            "Bull Case",
-            "Bear Case",
-        ],
-    )
-
-    if scenario == "Base Case":
-
-        revenue_growth = 0.08
-        margin = 0.20
-
-    elif scenario == "Bull Case":
-
-        revenue_growth = 0.12
-        margin = 0.24
-
-    else:
-
-        revenue_growth = 0.03
-        margin = 0.16
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.metric(
-            "Revenue Growth",
-            f"{revenue_growth:.1%}",
-        )
-
-    with col2:
-
-        st.metric(
-            "Operating Margin",
-            f"{margin:.1%}",
-        )
-
-    st.info(
-        f"{scenario} assumptions selected."
-    )
-
-
-# ============================================================
-# SENSITIVITY ANALYSIS
-# ============================================================
-
-elif page == "Sensitivity Analysis":
-
-    st.header("DCF Sensitivity Analysis")
-
-    if not st.session_state.fcfs:
-
-        st.warning(
-            "Save forecast FCFs before running sensitivity analysis."
-        )
-
-    else:
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-
-            base_wacc = st.number_input(
-                "Base WACC",
-                min_value=0.01,
-                max_value=0.50,
-                value=0.10,
-                step=0.01,
-                format="%.2f",
-            )
-
-        with col2:
-
-            base_growth = st.number_input(
-                "Base Terminal Growth",
-                min_value=0.0,
-                max_value=0.15,
-                value=0.03,
-                step=0.01,
-                format="%.2f",
-            )
-
-        discount_rates = [
-            base_wacc - 0.02,
-            base_wacc - 0.01,
-            base_wacc,
-            base_wacc + 0.01,
-            base_wacc + 0.02,
+        # Phase 7: market-based valuation methods (comps + precedents).
+        from core.valuation import build_comps_from_dataset, build_precedent_from_dataset
+
+        comps = build_comps_from_dataset(dataset, statistic="median")
+        comps_prices = [
+            v.implied_share_price for v in comps.valuations if v.implied_share_price
         ]
-
-        growth_rates = [
-            base_growth - 0.01,
-            base_growth,
-            base_growth + 0.01,
-            base_growth + 0.02,
+        precedent = build_precedent_from_dataset(dataset, statistic="median")
+        prec_prices = [
+            v.implied_share_price for v in precedent.valuations if v.implied_share_price
         ]
+        if comps_prices:
+            print(
+                f"Comps ({ticker}, {len(comps.peers)} peers): implied "
+                f"${min(comps_prices):,.0f}–${max(comps_prices):,.0f}/share (median multiples)"
+            )
+        if prec_prices:
+            print(
+                f"Precedents ({ticker}, sample): implied "
+                f"${min(prec_prices):,.0f}–${max(prec_prices):,.0f}/share"
+            )
 
-        # Remove invalid negative growth rates
-        growth_rates = [
-            g for g in growth_rates
-            if g >= 0
-        ]
+        # Phase 8: reverse DCF (what growth does today's price imply?).
+        from core.valuation import reverse_dcf_valuation
 
-        # DCF requires WACC > terminal growth
-        growth_rates = [
-            g for g in growth_rates
-            if g < min(discount_rates)
-        ]
+        reverse = reverse_dcf_valuation(dataset, terminal_growth=0.025, horizon_years=5)
+        if reverse.converged:
+            print(
+                f"Reverse DCF ({ticker}): market price implies "
+                f"{reverse.implied_value * 100:.1f}%/yr revenue growth"
+            )
 
-        if st.button(
-            "Run Sensitivity Analysis",
-            type="primary",
-        ):
+        # Phase 9: Monte Carlo valuation distribution.
+        from core.valuation import monte_carlo_valuation
 
-            try:
+        mc = monte_carlo_valuation(
+            dataset, base_growth=0.06, horizon_years=5, terminal_growth=0.025,
+            n_simulations=10_000, seed=42,
+        )
+        upside = f", P(upside) {mc.prob_upside * 100:.0f}%" if mc.prob_upside is not None else ""
+        print(
+            f"Monte Carlo ({ticker}, {mc.n_simulations:,} sims): "
+            f"P10 ${mc.p10:,.0f} / P50 ${mc.p50:,.0f} / P90 ${mc.p90:,.0f}{upside}"
+        )
 
-                sensitivity = dcf_sensitivity(
-                    free_cash_flows=st.session_state.fcfs,
-                    discount_rates=discount_rates,
-                    terminal_growth_rates=growth_rates,
-                )
+    # Phase 10: document RAG over a bundled sample filing (fully offline).
+    from pathlib import Path
 
-                st.success(
-                    "Sensitivity analysis completed."
-                )
+    from core.rag import build_rag_engine
 
-                st.subheader(
-                    "Enterprise Value Sensitivity"
-                )
+    sample_doc = Path(__file__).resolve().parent / "data" / "sample" / "SAMPLE_10K.txt"
+    if sample_doc.exists():
+        rag = build_rag_engine()
+        n_chunks = rag.ingest_file(sample_doc, doc_id="NMBS", document_name="Nimbus 10-K (sample)")
+        result = rag.answer("What are the main risk factors?", top_k=1)
+        top = result.sources[0]
+        print(
+            f"RAG (sample 10-K, {n_chunks} chunks): top match for 'risk factors' is "
+            f"section '{top.chunk.section}' — cited as {result.citations[0]}"
+        )
 
-                import pandas as pd
+    # Phase 11: the research agent orchestrating the engines end-to-end.
+    if samples:
+        from core.agents import build_agent
 
-                table = pd.DataFrame(
-                    sensitivity
-                ).T
+        agent = build_agent(provider="local", index_sample_filing=True)
+        response = agent.run(samples[0], "Give me a full valuation")
+        print(
+            f"Agent ({samples[0]}): ran {len(response.steps)} tools "
+            f"({', '.join(response.tools_used)})"
+        )
+        print(f"  {response.answer}")
 
-                table.index.name = "WACC"
+    # Phase 13: generate Excel + PDF reports for the first sample company.
+    if samples:
+        import tempfile
 
-                table.columns = [
-                    f"{g:.1%}"
-                    for g in table.columns
-                ]
+        from core.analysis import run_full_analysis
+        from core.outputs import build_excel_report, build_pdf_report
 
-                st.dataframe(
-                    table,
-                    use_container_width=True,
-                )
+        bundle = run_full_analysis(samples[0], provider="local")
+        with tempfile.TemporaryDirectory() as tmp:
+            xlsx = build_excel_report(bundle, Path(tmp) / f"{samples[0]}.xlsx")
+            pdf = build_pdf_report(bundle, Path(tmp) / f"{samples[0]}.pdf")
+            print(
+                f"Reports ({samples[0]}): Excel {xlsx.stat().st_size:,} bytes, "
+                f"PDF {pdf.stat().st_size:,} bytes generated."
+            )
 
-            except Exception as e:
+    print("Interactive dashboard: run `streamlit run app.py` (requires `pip install -r requirements.txt`).")
 
-                st.error(
-                    f"Sensitivity analysis failed: {e}"
-                )
+
+def _running_in_streamlit() -> bool:
+    """True when this module is being executed by ``streamlit run``."""
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+        return get_script_run_ctx() is not None
+    except Exception:
+        return False
+
+
+if __name__ == "__main__":
+    if _running_in_streamlit():
+        from ui.dashboard import main
+
+        main()
+    else:
+        smoke_test()
